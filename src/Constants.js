@@ -1,4 +1,1 @@
-const CONSTANTS={
-    playerSize:20
-}
-export default CONSTANTS;
+export const PLAYER_RADIUS = 10;

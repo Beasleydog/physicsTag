@@ -1,21 +1,23 @@
-class Renderer{
-    constructor(world,ctx){
-        this.world = world;     
-        this.ctx=ctx; 
+class Renderer {
+    constructor(world, ctx) {
+        this.world = world;
+        this.ctx = ctx;
+        this.render();
     }
-    render(){
+    render() {
         const players = this.world.getPlayers();
-        
-        this.ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        players.forEach((player) => {
+            ctx.beginPath();
+            const pos = player.getPosition();
+            console.log(pos.x, pos.y, player.radius)
+            ctx.arc(pos.x, pos.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "black";
+            ctx.fill();
+        });
 
-        players.forEach((player)=>{
-          this.ctx.beginPath();
-          const pos = player.getPosition();
-          this.ctx.arc(pos.x,pos.y,pos.radius,Math.PI*2,0);
-          this.ctx.fill();
-        })        
-        
-        requestAnimationFrame(render);
+        requestAnimationFrame(() => { this.render() });
     }
 }
 export default Renderer;

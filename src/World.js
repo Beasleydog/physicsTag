@@ -1,11 +1,11 @@
-class World{
-    constructor(){
-        this.players=[];
+class World {
+    constructor() {
+        this.players = [];
     }
-    addPlayer(player){
+    addPlayer(player) {
         this.players.push(player);
     }
-    getPlayers(){
+    getPlayers() {
         return this.players;
     }
 }
