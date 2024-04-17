@@ -11,7 +11,6 @@ class Renderer {
         players.forEach((player) => {
             ctx.beginPath();
             const pos = player.getPosition();
-            console.log(pos.x, pos.y, player.radius)
             ctx.arc(pos.x, pos.y, player.radius, 0, Math.PI * 2);
             ctx.fillStyle = "black";
             ctx.fill();

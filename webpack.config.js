@@ -1,8 +1,9 @@
-module.exports = {
-    entry: './src/index.js',
+module.exports = 
+    {
+    entry: './src/client/index.js',
     watch: true,
     output: {
-        path: __dirname,
-        filename: 'bundle.js'
+        path: __dirname+"/dist",
+        filename: 'index.js'
     }
 }

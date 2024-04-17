@@ -1,24 +1,84 @@
-import { PLAYER_RADIUS } from './Constants.js';
+import { PLAYER_RADIUS,PLAYER_MOVE_FORCE,PLAYER_MAX_SPEED,PLAYER_MASS,PLAYER_FRICTION } from './Constants.js';
 class Player {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    constructor(spawnX, spawnY,moveKeys) {
         this.radius = PLAYER_RADIUS;
+        this.p = {
+            x: spawnX,
+            y: spawnY
+        }
         this.v = {
             x: 0,
             y: 0
         }
         this.a = {
-            x: 0,
-            y: 0
+            x: 1,
+            y: 1
         }
+        this.mass=PLAYER_MASS;
+        this.radius=PLAYER_RADIUS;
         this.id = Math.random();
+
+        this.directionsMoving=[];
+        this.moveKeys=moveKeys;
+        this.initKeyListeners();
+    }
+    tickMovement(){
+      this.directionsMoving.forEach((direction)=>{
+        this.handleMove(direction);
+      });
+
+
+      this.v.x*=(this.a.x*PLAYER_FRICTION);
+      this.v.y*=(this.a.y*PLAYER_FRICTION);
+
+      //Cap movement speeds
+      if(Math.abs(this.v.x)>PLAYER_MAX_SPEED){
+        this.v.x=Math.sign(this.v.x)*PLAYER_MAX_SPEED;
+      }
+      if(Math.abs(this.v.y)>PLAYER_MAX_SPEED){
+        this.v.y=Math.sign(this.v.y)*PLAYER_MAX_SPEED;
+      }
+
+
+      this.p.x+=this.v.x;
+      this.p.y+=this.v.y;
+    }
+    handleMove(direction){
+      switch(direction){
+        case "up":
+          this.v.y-=PLAYER_MOVE_FORCE;
+          break;
+        case "down":
+          this.v.y+=PLAYER_MOVE_FORCE;
+          break;
+        case "left":
+          this.v.x-=PLAYER_MOVE_FORCE;
+          break;
+        case "right":
+          this.v.x+=PLAYER_MOVE_FORCE;
+          break;
+        default:
+          break;
+      }
+    }
+    initKeyListeners(){
+      document.addEventListener("keydown",(e)=>{
+        Object.keys(this.moveKeys).forEach((direction)=>{
+          if(this.moveKeys[direction]===e.key){
+            this.directionsMoving.push(direction);
+          }
+        });
+      });
+      document.addEventListener("keyup",(e)=>{
+        Object.keys(this.moveKeys).forEach((direction)=>{
+          if(this.moveKeys[direction]===e.key){
+            this.directionsMoving=this.directionsMoving.filter((dir)=>dir!==direction);
+          }
+        });
+      });
     }
     getPosition() {
-        return {
-            x: this.x,
-            y: this.y
-        }
+        return this.p;
     }
     getID() {
         return this.id;
