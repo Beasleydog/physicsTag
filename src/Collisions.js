@@ -55,4 +55,4 @@ function HandleCollision(playerOne,playerTwo){
     playerOne.p={x:fpos1.x,y: fpos1.y};
     playerTwo.p={x:fpos2.x, y:fpos2.y};
 }
-export {HandleCollision}
+module.exports= HandleCollision

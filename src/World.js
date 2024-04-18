@@ -1,8 +1,28 @@
-import {HandleCollision} from "./Collisions.js";
+const HandleCollision =require("./Collisions.js");
 class World {
     constructor() {
         this.players = [];
+        this.listeners=[];
         this.gameLoop();
+    }
+    addEventListener(callback){
+      //Format for callback params:
+      //Player, Event, Event Status
+      this.listeners.push(callback);
+    }
+    bindKeys(player,eventsAndKeys){
+      Object.keys(eventsAndKeys).forEach((event)=>{
+          document.addEventListener("keydown",(e)=>{
+              if(eventsAndKeys[event]===e.key){
+                this.simulateEvent(player,event,true);
+              }
+          });
+          document.addEventListener("keyup",(e)=>{
+              if(eventsAndKeys[event]===e.key){
+                this.simulateEvent(player,event,false);
+              }
+          });
+      })
     }
     addPlayer(player) {
         this.players.push(player);
@@ -13,8 +33,11 @@ class World {
     getPlayers() {
         return this.players;
     }
-    simulateEvent(event,player){
-      player.handleEvent(event);
+    simulateEvent(player,event,eventStatus){
+      this.listeners.forEach((c)=>{
+        c(player,event,eventStatus);
+      })
+      player.simulateEvent(event,eventStatus);
     }
     gameLoop(){
       this.players.forEach((player)=>{
@@ -29,4 +52,4 @@ class World {
       requestAnimationFrame(()=>{this.gameLoop()});
     }
 }
-export default World;
+module.exports=World;

@@ -1,14 +1,22 @@
 const { io } = require("socket.io-client");
 
 class ClientMultiplayer{
-    constructor(){
+    constructor(player){
+        this.player=player;
         this.socket=io();
+        this.packetNumber = 0;
     }
     joinRoom(roomId){
         this.socket.emit("join-room",roomId);
     }
-    sendAction(action){
-        this.socket.emit("action",action);
+    sendEvent(eventName,eventStatus){
+        this.socket.emit("event",{
+            player:this.player,
+            eventName:eventName,
+            eventStatus:eventStatus,
+            packetNumber:this.packetNumber
+        });
+        this.packetNumber++;
     }
 }
 export default ClientMultiplayer;

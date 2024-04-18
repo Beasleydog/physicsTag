@@ -1,4 +1,4 @@
-import Room from './Room.js';
+const Room =require('./Room.js');
 class ServerRoomManager{
     constructor(){
         this.rooms = [];

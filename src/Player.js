@@ -20,7 +20,6 @@ class Player {
 
         this.directionsMoving=[];
         this.moveKeys=moveKeys;
-        this.initKeyListeners();
     }
     tickMovement(){
       this.directionsMoving.forEach((direction)=>{
@@ -61,22 +60,19 @@ class Player {
           break;
       }
     }
-    initKeyListeners(){
-      document.addEventListener("keydown",(e)=>{
-        Object.keys(this.moveKeys).forEach((direction)=>{
-          if(this.moveKeys[direction]===e.key){
-            this.directionsMoving.push(direction);
-          }
-        });
-      });
-      document.addEventListener("keyup",(e)=>{
-        Object.keys(this.moveKeys).forEach((direction)=>{
-          if(this.moveKeys[direction]===e.key){
-            this.directionsMoving=this.directionsMoving.filter((dir)=>dir!==direction);
-          }
-        });
-      });
+    simulateEvent(eventName,eventStatus){
+      if(["up","down","left","right"].includes(eventName)){
+        //This is a movement event
+        if(eventStatus){
+          //Key Down
+          this.directionsMoving.push(eventName);
+        }else{
+          //Key Up
+          this.directionsMoving=this.directionsMoving.filter((dir)=>dir!==eventName);
+        }
+      }
     }
+    
     getPosition() {
         return this.p;
     }
