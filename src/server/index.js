@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http");
 const app = express();
 const port = 3000;
+const { SERVER_UPDATE_INTERVAL } = require("../Constants.js");
+const Player = require("../Player.js");
 
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -20,21 +22,51 @@ const roomManager = new ServerRoomManager();
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.on("join-room", (roomId) => {
+
+  socket.on("join-room", ({ roomId, playerId }) => {
     //Handle a user joining a room
     let existingRoom = roomManager.getRoom(roomId);
     if (!existingRoom) {
+
       existingRoom = roomManager.createRoom(roomId);
     }
+    const player = new Player(0, 0);
+    //Overwrite id to ensure it matches the id of the player on the client
+    player.id = playerId;
 
-    existingRoom.addPlayer(socket);
+    existingRoom.addPlayer(player);
     socket.room = existingRoom;
+    socket.player = player;
     socket.join(roomId);
   });
 
-  socket.on("event", (event) => {
-    socket.existingRoom.simulateEvent(event);
+  socket.on("events", (events) => {
+    if (!socket.room) {
+      console.error("DEAD CLIENT");
+      return;
+    }
+    socket.room.simulateEvents(events);
+  });
+
+  socket.on("disconnect", () => {
+    if (!socket.room) {
+      console.error("DEAD CLIENT");
+      return;
+    }
+    socket.room.removePlayer(socket.player);
   });
 });
+
+setInterval(() => {
+  roomManager.rooms.forEach((room) => {
+    //Broadcast world state to each socket in room
+    io.to(room.name).emit("world-state", room.serializeWorld());
+    console.log("sending state", room.serializeWorld());
+
+    room.dumpEvents();
+
+    // throw "only one";
+  });
+}, SERVER_UPDATE_INTERVAL);
 
 server.listen(port);

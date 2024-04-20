@@ -1,12 +1,11 @@
 import Player from "../Player.js";
-const World =require("../World.js");
-console.log(World);
+const World = require("../World.js");
 import Renderer from "../Renderer.js";
 import ClientMultiplayer from "./ClientMultiplayer.js";
 
 //Have to wait till onload beacuse playcode is weird
-window.onload = ()=>{
-  const ourWorld = new World();
+window.onload = () => {
+  const ourWorld = new World(true);
 
   //Setup canvas
   const gameCanvas = document.createElement("canvas");
@@ -17,25 +16,26 @@ window.onload = ()=>{
   const ctx = gameCanvas.getContext("2d");
   const ourRenderer = new Renderer(ourWorld, ctx);
 
-  const playerOne = new Player(20, 10);
-  const playerTwo = new Player(10, 10);
-  ourWorld.addPlayer(playerOne);
+  const ourPlayer = new Player(0, 0);
+  ourPlayer.setShouldInterpolatePositionUpdates(false);
+  ourWorld.addPlayer(ourPlayer);
 
-  ourWorld.bindKeys(playerOne,{
-    up:"w",
-    left:"a",
-    down:"s",
-    right:"d"
+  ourWorld.bindKeys(ourPlayer, {
+    up: "w",
+    left: "a",
+    down: "s",
+    right: "d"
   });
 
-  //Multiplayer stuff
-  const multiplayer = new ClientMultiplayer(player);
+  // Multiplayer stuff
+  const multiplayer = new ClientMultiplayer(ourPlayer);
   multiplayer.joinRoom("test");
-  
-  ourWorld.addEventListener((player,event,status)=>{
-    console.log(player,event,status);
-    multiplayer.sendEvent(event,status)
-  })
+  multiplayer.addReceiveWorldListener((update) => {
+    console.log("recieved update", update);
+    ourWorld.deserialize(update.world, update.playersLatestPackets);
+  });
 
-  console.log(multiplayer);
+  ourWorld.addEventListener((activeEvents, tickNumber) => {
+    multiplayer.sendEvents(activeEvents, tickNumber);
+  })
 }
