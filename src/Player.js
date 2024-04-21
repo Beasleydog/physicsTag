@@ -28,15 +28,28 @@ class Player {
   setShouldInterpolatePositionUpdates(shouldInterpolate) {
     this.shouldInterpolatePositionUpdates = shouldInterpolate;
   }
+  lerpPosition(newPosition){
+    //Lerp to a new position in PLAYER_POSITION_INTERPOLATION_TIME
+    const loopSpeed = 1;
+    const dx = newPosition.x - this.p.x;
+    const dy = newPosition.y - this.p.y;
+    const iterations = PLAYER_POSITION_INTERPOLATION_TIME/loopSpeed;
+    const xjump = dx/iterations;
+    const yjump = dy/iterations;
+    const interval  = setInterval(()=>{
+      this.p.x += xjump;
+      this.p.y += yjump;
+    }, loopSpeed);
+    setTimeout(()=>{
+      clearInterval(interval);
+    }, PLAYER_POSITION_INTERPOLATION_TIME);
+  }
   update(player) {
     //Update to a new player object (probably from the server)
 
-    if (this.shouldInterpolatePositionUpdates) {
+    if (this.shouldInterpolatePositionUpdates&&true) {
       //Interpolate the position
-      this.targetP = player.p;
-      this.startingP = this.p;
-      this.pTargetTime = Date.now() + PLAYER_POSITION_INTERPOLATION_TIME;
-      this.pStartingTime = Date.now();
+      this.lerpPosition(player.p);
     } else {
       this.p = player.p;
     }
@@ -67,22 +80,7 @@ class Player {
 
 
     this.p.x += this.v.x;
-    this.p.y += this.v.y;
-
-    //Handle position interpolation
-    if (this.pTargetTime && this.startingP && this.targetP) {
-      const now = Date.now();
-      const timeLeft = this.pTargetTime - now;
-      if (timeLeft > 0) {
-        const timePassed = now - this.pStartingTime;
-        const percentToTarget = timePassed / PLAYER_POSITION_INTERPOLATION_TIME;
-        this.p.x = this.startingP.x + ((this.targetP.x - this.startingP.x) * percentToTarget);
-        this.p.y = this.startingP.y + ((this.targetP.y - this.startingP.y) * percentToTarget);
-      } else {
-        this.pTargetTime = null;
-      }
-
-    }
+    this.p.y += this.v.y;  
   }
   handleMove(direction) {
     switch (direction) {

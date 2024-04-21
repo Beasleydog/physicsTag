@@ -17,7 +17,7 @@ window.onload = () => {
   const ourRenderer = new Renderer(ourWorld, ctx);
 
   const ourPlayer = new Player(0, 0);
-  ourPlayer.setShouldInterpolatePositionUpdates(false);
+  // ourPlayer.setShouldInterpolatePositionUpdates(false);
   ourWorld.addPlayer(ourPlayer);
 
   ourWorld.bindKeys(ourPlayer, {
@@ -37,11 +37,11 @@ window.onload = () => {
 
   ourWorld.addEventListener((activeEvents, tickNumber) => {
     multiplayer.sendEvents(activeEvents, tickNumber);
-    setTimeout(() => {
-      console.log(ourWorld.storedEvents);
-      // ourWorld.stop();
-      // throw "stop";
-    }, 10 * 1000);
+    // setTimeout(() => {
+    //   console.log(ourWorld.storedEvents);
+    //   ourWorld.stop();
+    //   throw "stop";
+    // }, 10 * 1000);
   });
 
 }

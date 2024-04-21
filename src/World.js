@@ -86,7 +86,7 @@ class World {
       const activeEvents = this.activeEvents[player.id];
       this.runEvents(player, activeEvents);
 
-      player.tickMovement();
+      // player.tickMovement();
       this.players.forEach((secondaryPlayer) => {
         if (player.id === secondaryPlayer.id) return;
         HandleCollision(player, secondaryPlayer);
@@ -147,7 +147,7 @@ class World {
       })
     ).p);
     console.log("YO WE ARE THIS MANY TICKS BEHIND, ", this.tickNumber - lastTickServerSaw);
-    for (var i = lastTickServerSaw; i < this.tickNumber; i++) {
+    for (var i = lastTickServerSaw+1; i <= this.tickNumber; i++) {
       console.log("SIMULATING THESE EVENTS ", this.storedEvents[i][this.players[0].id]);
 
       this.runEvents(this.players[0], this.storedEvents[i][this.players[0].id]);

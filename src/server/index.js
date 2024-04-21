@@ -66,10 +66,10 @@ setInterval(() => {
     room.dumpEvents();
 
     // throw "only one";
-    setTimeout(() => {
-      console.log(room.world.storedEvents);
+    // setTimeout(() => {
+    //   console.log(room.world.storedEvents);
       // throw "stop";
-    }, 10 * 1000);
+    // }, 10 * 1000);
   });
 }, SERVER_UPDATE_INTERVAL);
 
