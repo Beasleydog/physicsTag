@@ -37,5 +37,11 @@ window.onload = () => {
 
   ourWorld.addEventListener((activeEvents, tickNumber) => {
     multiplayer.sendEvents(activeEvents, tickNumber);
-  })
+    setTimeout(() => {
+      console.log(ourWorld.storedEvents);
+      // ourWorld.stop();
+      // throw "stop";
+    }, 10 * 1000);
+  });
+
 }

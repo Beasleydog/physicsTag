@@ -1,5 +1,6 @@
 const HandleCollision = require("./Collisions.js");
 const Player = require("./Player.js");
+const accurateInterval = require("./utils/accurateInterval");
 const { WORLD_TICK_SPEED } = require("./Constants.js");
 class World {
   constructor(client) {
@@ -11,7 +12,11 @@ class World {
 
     this.activeEvents = {};
 
-    this.gameLoop();
+    this.stopped = false;
+
+    this.loop = accurateInterval(() => {
+      this.gameLoop();
+    }, WORLD_TICK_SPEED);
   }
   addEventListener(callback) {
     //Format for callback params:
@@ -59,11 +64,22 @@ class World {
         //Movement event
         player.handleMove(event.eventName);
       }
-    })
+    });
+    player.tickMovement();
+  }
+  stop() {
+    clearInterval(this.loop);
   }
   gameLoop() {
-    this.tickNumber++;
-    this.storedEvents[this.tickNumber] = this.activeEvents;
+    if (this.stopped) return;
+
+    if (this.lastLoopTime) {
+      console.log("Loop speed", Date.now() - this.lastLoopTime, "ms");
+    }
+    this.lastLoopTime = Date.now();
+
+    console.log("storing these events", JSON.stringify(this.activeEvents))
+    this.storedEvents[this.tickNumber] = JSON.parse(JSON.stringify(this.activeEvents));
 
     this.players.forEach((player) => {
       //Apply active events
@@ -71,23 +87,25 @@ class World {
       this.runEvents(player, activeEvents);
 
       player.tickMovement();
-      console.log(player.p);
       this.players.forEach((secondaryPlayer) => {
         if (player.id === secondaryPlayer.id) return;
         HandleCollision(player, secondaryPlayer);
-      })
+      });
+
+      if (this.client) {
+        console.log("PLAYER POSITION AT ", this.tickNumber, player.p);
+      }
     })
 
-    setTimeout(() => {
-      this.gameLoop();
-    }, WORLD_TICK_SPEED);
 
     if (this.client) {
       console.log(this.activeEvents, this.tickNumber);
+
     }
     this.listeners.forEach((c) => {
       c(this.activeEvents, this.tickNumber);
     });
+    this.tickNumber++;
   }
   serialize() {
     return {
@@ -100,11 +118,6 @@ class World {
   deserialize(newWorld, playersLatestPackets) {
     //Loop through all players in newWorld. If we have a player with the same id, update it. If not, add it.
     newWorld.players.forEach((newPlayer) => {
-      // console.log("got a player from server");
-      // console.log(newPlayer.p);
-      // console.log(newPlayer.v);
-      // console.log(newPlayer.a);
-
       let existingPlayer = this.getPlayer(newPlayer.id);
       if (existingPlayer) {
         existingPlayer.update(newPlayer);
@@ -127,10 +140,17 @@ class World {
 
     //YOUR client will always be first object
     let lastTickServerSaw = playersLatestPackets[this.players[0].id];
+    console.log("SERVER SAW TICK", this.tickNumber);
+    console.log("server had us at this pos at that tick", newWorld.players.find(
+      ((x) => {
+        return x.id === this.players[0].id;
+      })
+    ).p);
     console.log("YO WE ARE THIS MANY TICKS BEHIND, ", this.tickNumber - lastTickServerSaw);
     for (var i = lastTickServerSaw; i < this.tickNumber; i++) {
+      console.log("SIMULATING THESE EVENTS ", this.storedEvents[i][this.players[0].id]);
+
       this.runEvents(this.players[0], this.storedEvents[i][this.players[0].id]);
-      this.players[0].tickMovement();
     }
   }
 }

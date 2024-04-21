@@ -14,12 +14,19 @@ class Room {
         const player = this.world.getPlayer(events.playerId);
 
         console.log("--------");
-        console.log(events, player.p);
+        // console.log(events, JSON.stringify(player.p));
 
         this.world.simulatePlayersEvents(player, events.events[player.id]);
+        // this.world.runEvents(player, events.events[player.id]);
+
+        console.log("JUST SIMULATED PACKET", events.tickNumber);
+
+
+        console.log(player.p);
     }
     dumpEvents() {
         this.queuedEvents = [];
+
     }
     addPlayer(player) {
         this.world.addPlayer(player);
