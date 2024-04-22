@@ -14,9 +14,26 @@ class World {
 
     this.stopped = false;
 
+    this.debugPoints=[];
+
     this.loop = accurateInterval(() => {
       this.gameLoop();
     }, WORLD_TICK_SPEED);
+  }
+  getDebugPoints(){
+    return this.debugPoints;
+  }
+  addDebugPoint(x,y,radius,color){
+    if(this.debugPoints.length>20){
+      this.debugPoints=this.debugPoints.slice(1);
+    }
+
+    this.debugPoints.push({
+      x,
+      y,
+      radius,
+      color
+    });
   }
   addEventListener(callback) {
     //Format for callback params:
@@ -79,6 +96,7 @@ class World {
     this.lastLoopTime = Date.now();
 
     console.log("storing these events", JSON.stringify(this.activeEvents))
+    console.log("latest tick stored",this.tickNumber);
     this.storedEvents[this.tickNumber] = JSON.parse(JSON.stringify(this.activeEvents));
 
     this.players.forEach((player) => {
@@ -118,7 +136,9 @@ class World {
   deserialize(newWorld, playersLatestPackets) {
     //Loop through all players in newWorld. If we have a player with the same id, update it. If not, add it.
     newWorld.players.forEach((newPlayer) => {
+      
       let existingPlayer = this.getPlayer(newPlayer.id);
+      
       if (existingPlayer) {
         existingPlayer.update(newPlayer);
       } else {
@@ -126,9 +146,11 @@ class World {
         const newPlayerObject = new Player(0, 0);
         newPlayerObject.update(newPlayer);
         this.addPlayer(newPlayerObject);
-
+        
         existingPlayer = newPlayerObject;
       }
+      this.addDebugPoint(newPlayer.p.x,newPlayer.p.y,10,"red");
+      this.addDebugPoint(existingPlayer.p.x,existingPlayer.p.y,10,"green");
 
       //Remove players that are no longer in the world
       this.players.forEach((player) => {
@@ -147,10 +169,14 @@ class World {
       })
     ).p);
     console.log("YO WE ARE THIS MANY TICKS BEHIND, ", this.tickNumber - lastTickServerSaw);
-    for (var i = lastTickServerSaw+1; i <= this.tickNumber; i++) {
-      console.log("SIMULATING THESE EVENTS ", this.storedEvents[i][this.players[0].id]);
-
-      this.runEvents(this.players[0], this.storedEvents[i][this.players[0].id]);
+    console.log("WE ARE AT TICK ",this.tickNumber);
+    for (var i = lastTickServerSaw+1; i < this.tickNumber; i++) {
+      console.log("----");
+      console.log("SIMULATING THESE EVENTS ", i,this.storedEvents[i][this.players[0].id]);
+      const events = this.storedEvents[i][this.players[0].id];
+      if(events.length>0){
+        this.runEvents(this.players[0], events);
+      }
     }
   }
 }

@@ -16,6 +16,14 @@ class Renderer {
             ctx.fill();
         });
 
+        const debugPoints = this.world.getDebugPoints();
+        debugPoints.forEach((point)=>{
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
+            ctx.fillStyle = point.color;
+            ctx.fill();
+        })
+
         requestAnimationFrame(() => { this.render() });
     }
 }
