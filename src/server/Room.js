@@ -13,16 +13,10 @@ class Room {
         //Pass a event recieved over network to our copy of the world
         const player = this.world.getPlayer(events.playerId);
 
-        console.log("--------");
-        // console.log(events, JSON.stringify(player.p));
+        if(!player)return;
 
         this.world.simulatePlayersEvents(player, events.events[player.id]);
         // this.world.runEvents(player, events.events[player.id]);
-
-        console.log("JUST SIMULATED PACKET", events.tickNumber);
-
-
-        console.log(player.p);
     }
     dumpEvents() {
         this.queuedEvents = [];
@@ -33,6 +27,10 @@ class Room {
     }
 
     removePlayer(player) {
+        //Make sure at least somebody is always IT
+        if(player.isIt()){
+            this.world.players[0]?.setIt(true);
+        }
         this.world.removePlayer(player);
     }
 

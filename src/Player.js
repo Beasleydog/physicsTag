@@ -14,6 +14,9 @@ class Player {
       x: 1,
       y: 1
     }
+
+    this.gameData={};
+
     this.mass = PLAYER_MASS;
     this.radius = PLAYER_RADIUS;
     this.id = Math.random();
@@ -24,6 +27,12 @@ class Player {
     this.shouldInterpolatePositionUpdates = true;
 
     this.tickNumber = 0;
+  }
+  setIt(bool){
+    this.gameData.it = bool;
+  }
+  isIt(){
+    return this.gameData.it;
   }
   setShouldInterpolatePositionUpdates(shouldInterpolate) {
     this.shouldInterpolatePositionUpdates = shouldInterpolate;
@@ -58,6 +67,7 @@ class Player {
     this.mass = player.mass;
     this.radius = player.radius;
     this.id = player.id;
+    this.gameData=player.gameData;
   }
   tickMovement() {
     this.tickNumber++;

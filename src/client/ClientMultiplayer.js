@@ -16,13 +16,11 @@ class ClientMultiplayer {
         this.socket.emit("join-room", { roomId, playerId: this.player.id });
     }
     sendEvents(events, tickNumber) {
-        setTimeout(() => {
             this.socket.emit("events", {
                 playerId: this.player.id,
                 events: events,
                 tickNumber: tickNumber
             });
-        }, FAKE_LAG);
     }
     addReceiveWorldListener(callback) {
         this.recieveWorldListeners.push(callback);

@@ -14,25 +14,24 @@ class World {
 
     this.stopped = false;
 
-    this.debugPoints=[];
+    this.debugPoints = [];
 
     this.loop = accurateInterval(() => {
       this.gameLoop();
     }, WORLD_TICK_SPEED);
   }
-  getDebugPoints(){
+  getDebugPoints() {
     return this.debugPoints;
   }
-  addDebugPoint(x,y,radius,color){
-    if(this.debugPoints.length>20){
-      this.debugPoints=this.debugPoints.slice(1);
+  addDebugPoint(x, y, radius, color) {
+    if (this.debugPoints.length > 1) {
+      this.debugPoints = this.debugPoints.slice(1);
     }
-
     this.debugPoints.push({
       x,
       y,
       radius,
-      color
+      color,
     });
   }
   addEventListener(callback) {
@@ -46,17 +45,18 @@ class World {
         if (e.repeat) return;
         if (eventsAndKeys[event] === e.key) {
           this.activeEvents[player.id].push({
-            eventName: event
+            eventName: event,
           });
         }
       });
       document.addEventListener("keyup", (e) => {
         if (eventsAndKeys[event] === e.key) {
-          this.activeEvents[player.id] = this.activeEvents[player.id].filter(x => x.eventName != event);
+          this.activeEvents[player.id] = this.activeEvents[player.id].filter(
+            (x) => x.eventName != event
+          );
         }
       });
-
-    })
+    });
   }
   addPlayer(player) {
     this.players.push(player);
@@ -64,7 +64,6 @@ class World {
   }
   removePlayer(player) {
     this.players = this.players.filter((p) => p.id !== player.id);
-
   }
   getPlayer(id) {
     return this.players.find((player) => player.id === id);
@@ -73,6 +72,8 @@ class World {
     return this.players;
   }
   simulatePlayersEvents(player, activeEvents) {
+    // if(!!this.activeEvents[player.id]) this.activeEvents[player.id]=[];
+    // this.activeEvents[player.id]=this.activeEvents[player.id].concat(activeEvents);
     this.activeEvents[player.id] = activeEvents;
   }
   runEvents(player, activeEvents) {
@@ -85,19 +86,18 @@ class World {
     player.tickMovement();
   }
   stop() {
-    clearInterval(this.loop);
+    this.stopped = true;
   }
   gameLoop() {
     if (this.stopped) return;
 
-    if (this.lastLoopTime) {
-      console.log("Loop speed", Date.now() - this.lastLoopTime, "ms");
-    }
     this.lastLoopTime = Date.now();
 
-    console.log("storing these events", JSON.stringify(this.activeEvents))
-    console.log("latest tick stored",this.tickNumber);
-    this.storedEvents[this.tickNumber] = JSON.parse(JSON.stringify(this.activeEvents));
+    const eventsToStore = JSON.parse(
+      JSON.stringify(this.activeEvents)
+    );
+    console.log("at tick ",this.tickNumber," these are the events ", eventsToStore)
+    this.storedEvents[this.tickNumber] = eventsToStore;
 
     this.players.forEach((player) => {
       //Apply active events
@@ -107,19 +107,21 @@ class World {
       // player.tickMovement();
       this.players.forEach((secondaryPlayer) => {
         if (player.id === secondaryPlayer.id) return;
-        HandleCollision(player, secondaryPlayer);
+        const collided = HandleCollision(player, secondaryPlayer);
+
+        //Handle the switching of it
+        if (collided) {
+          if (player.isIt()) {
+            player.setIt(false);
+            secondaryPlayer.setIt(true);
+          } else if (secondaryPlayer.isIt()) {
+            player.setIt(true);
+            secondaryPlayer.setIt(false);
+          }
+        }
       });
+    });
 
-      if (this.client) {
-        console.log("PLAYER POSITION AT ", this.tickNumber, player.p);
-      }
-    })
-
-
-    if (this.client) {
-      console.log(this.activeEvents, this.tickNumber);
-
-    }
     this.listeners.forEach((c) => {
       c(this.activeEvents, this.tickNumber);
     });
@@ -130,15 +132,14 @@ class World {
       players: this.players.map((player) => {
         return player.serialize();
       }),
-      tickNumber: this.tickNumber
-    }
+      tickNumber: this.tickNumber,
+    };
   }
   deserialize(newWorld, playersLatestPackets) {
     //Loop through all players in newWorld. If we have a player with the same id, update it. If not, add it.
     newWorld.players.forEach((newPlayer) => {
-      
       let existingPlayer = this.getPlayer(newPlayer.id);
-      
+
       if (existingPlayer) {
         existingPlayer.update(newPlayer);
       } else {
@@ -146,11 +147,11 @@ class World {
         const newPlayerObject = new Player(0, 0);
         newPlayerObject.update(newPlayer);
         this.addPlayer(newPlayerObject);
-        
+
         existingPlayer = newPlayerObject;
       }
-      this.addDebugPoint(newPlayer.p.x,newPlayer.p.y,10,"red");
-      this.addDebugPoint(existingPlayer.p.x,existingPlayer.p.y,10,"green");
+      // this.addDebugPoint(newPlayer.p.x,newPlayer.p.y,20,"red");
+      // this.addDebugPoint(existingPlayer.p.x,existingPlayer.p.y,10,"green");
 
       //Remove players that are no longer in the world
       this.players.forEach((player) => {
@@ -162,22 +163,19 @@ class World {
 
     //YOUR client will always be first object
     let lastTickServerSaw = playersLatestPackets[this.players[0].id];
-    console.log("SERVER SAW TICK", this.tickNumber);
-    console.log("server had us at this pos at that tick", newWorld.players.find(
-      ((x) => {
-        return x.id === this.players[0].id;
-      })
-    ).p);
-    console.log("YO WE ARE THIS MANY TICKS BEHIND, ", this.tickNumber - lastTickServerSaw);
-    console.log("WE ARE AT TICK ",this.tickNumber);
-    for (var i = lastTickServerSaw+1; i < this.tickNumber; i++) {
-      console.log("----");
-      console.log("SIMULATING THESE EVENTS ", i,this.storedEvents[i][this.players[0].id]);
-      const events = this.storedEvents[i][this.players[0].id];
-      if(events.length>0){
-        this.runEvents(this.players[0], events);
-      }
-    }
+
+    //SERVER RECONCILLATION, NOT WORKING ATM
+    console.log("-----");
+    console.log(JSON.parse(JSON.stringify(this.storedEvents)));
+    console.log(lastTickServerSaw);
+    const allEventIdsToDo = Object.keys(this.storedEvents).slice(
+      Object.keys(this.storedEvents).indexOf(String(lastTickServerSaw))
+    );
+    console.log(allEventIdsToDo);
+    allEventIdsToDo.forEach((tickToRun) => {
+      const events = this.storedEvents[tickToRun][this.players[0].id];
+      this.runEvents(this.players[0], events);
+    });
   }
 }
 module.exports = World;

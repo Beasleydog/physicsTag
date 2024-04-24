@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const app = express();
 const port = 3000;
-const { SERVER_UPDATE_INTERVAL } = require("../Constants.js");
+const { SERVER_UPDATE_INTERVAL,FAKE_LAG } = require("../Constants.js");
 const Player = require("../Player.js");
 
 const server = http.createServer(app);
@@ -24,15 +24,21 @@ io.on("connection", (socket) => {
 
 
   socket.on("join-room", ({ roomId, playerId }) => {
-    //Handle a user joining a room
-    let existingRoom = roomManager.getRoom(roomId);
-    if (!existingRoom) {
-
-      existingRoom = roomManager.createRoom(roomId);
-    }
     const player = new Player(0, 0);
     //Overwrite id to ensure it matches the id of the player on the client
     player.id = playerId;
+
+    //Handle a user joining a room
+    let existingRoom = roomManager.getRoom(roomId);
+    if (!existingRoom) {
+      existingRoom = roomManager.createRoom(roomId);
+    }
+   
+    if(!existingRoom||existingRoom.world.players.length==0){
+      //If they are the first in the room, they are IT by default
+      player.setIt(true);
+
+    }
 
     existingRoom.addPlayer(player);
     socket.room = existingRoom;
@@ -45,7 +51,10 @@ io.on("connection", (socket) => {
       console.error("DEAD CLIENT");
       return;
     }
-    socket.room.simulateEvents(events);
+    setTimeout(()=>{
+      socket.room.simulateEvents(events);
+    },FAKE_LAG);
+
   });
 
   socket.on("disconnect", () => {
@@ -61,15 +70,7 @@ setInterval(() => {
   roomManager.rooms.forEach((room) => {
     //Broadcast world state to each socket in room
     io.to(room.name).emit("world-state", room.serializeWorld());
-    console.log("sending state", room.serializeWorld());
-
     room.dumpEvents();
-
-    // throw "only one";
-    // setTimeout(() => {
-    //   console.log(room.world.storedEvents);
-      // throw "stop";
-    // }, 10 * 1000);
   });
 }, SERVER_UPDATE_INTERVAL);
 

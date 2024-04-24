@@ -24,7 +24,7 @@ function HandleCollision(playerOne,playerTwo){
     let pos1 = new Vector(playerOne.p.x, playerOne.p.y);
     let pos2 = new Vector(playerTwo.p.x,playerTwo.p.y);
 
-    if(pos1.subtract(pos2).getMag()>playerOne.radius+playerTwo.radius)return;
+    if(pos1.subtract(pos2).getMag()>playerOne.radius+playerTwo.radius)return false;
 
     let normal = pos1.subtract(pos2).normalize();
     let v1 = new Vector(playerOne.v.x, playerOne.v.y);
@@ -54,5 +54,7 @@ function HandleCollision(playerOne,playerTwo){
 
     playerOne.p={x:fpos1.x,y: fpos1.y};
     playerTwo.p={x:fpos2.x, y:fpos2.y};
+
+    return true;
 }
 module.exports= HandleCollision

@@ -12,8 +12,14 @@ class Renderer {
             ctx.beginPath();
             const pos = player.getPosition();
             ctx.arc(pos.x, pos.y, player.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "black";
+            ctx.fillStyle = `hsl(${Math.round(100*player.id)} 100% 50%`;
             ctx.fill();
+
+            if(player.isIt()){
+                ctx.strokeStyle="black";
+                ctx.lineWidth=10;
+                ctx.stroke();
+            }
         });
 
         const debugPoints = this.world.getDebugPoints();

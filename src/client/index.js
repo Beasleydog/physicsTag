@@ -21,27 +21,21 @@ window.onload = () => {
   ourWorld.addPlayer(ourPlayer);
 
   ourWorld.bindKeys(ourPlayer, {
-    up: "w",
-    left: "a",
-    down: "s",
-    right: "d"
+    up: "ArrowUp",
+    left: "ArrowLeft",
+    down: "ArrowDown",
+    right: "ArrowRight"
   });
 
   // Multiplayer stuff
   const multiplayer = new ClientMultiplayer(ourPlayer);
   multiplayer.joinRoom("test");
   multiplayer.addReceiveWorldListener((update) => {
-    console.log("recieved update", update);
     ourWorld.deserialize(update.world, update.playersLatestPackets);
   });
 
   ourWorld.addEventListener((activeEvents, tickNumber) => {
     multiplayer.sendEvents(activeEvents, tickNumber);
-    // setTimeout(() => {
-    //   console.log(ourWorld.storedEvents);
-    //   ourWorld.stop();
-    //   throw "stop";
-    // }, 10 * 1000);
   });
 
 }
