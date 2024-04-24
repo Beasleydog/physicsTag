@@ -137,9 +137,15 @@ class World {
   }
   deserialize(newWorld, playersLatestPackets) {
     //Loop through all players in newWorld. If we have a player with the same id, update it. If not, add it.
-    newWorld.players.forEach((newPlayer) => {
+    let currentPosition;
+    newWorld.players.forEach((newPlayer,i) => {
       let existingPlayer = this.getPlayer(newPlayer.id);
-
+      if(i==0){
+        currentPosition={
+        x:existingPlayer.p.x,
+        y:existingPlayer.p.y,
+      }
+    }
       if (existingPlayer) {
         existingPlayer.update(newPlayer);
       } else {
@@ -176,6 +182,14 @@ class World {
       const events = this.storedEvents[tickToRun][this.players[0].id];
       this.runEvents(this.players[0], events);
     });
+
+    const newPos = {
+      x:this.players[0].p.x,
+      y:this.players[0].p.y,
+    }
+
+    const distance = Math.sqrt(Math.pow(currentPosition.x-newPos.x,2)+Math.pow(currentPosition.y-newPos.y,2));
+    console.log("AFTER RECONCILING, WE ARE THIS FAR AWAY FROM POSTION ",distance);
   }
 }
 module.exports = World;

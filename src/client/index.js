@@ -38,4 +38,5 @@ window.onload = () => {
     multiplayer.sendEvents(activeEvents, tickNumber);
   });
 
+  window.world=ourWorld;
 }
