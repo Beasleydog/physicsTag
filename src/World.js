@@ -24,7 +24,7 @@ class World {
     return this.debugPoints;
   }
   addDebugPoint(x, y, radius, color) {
-    if (this.debugPoints.length > 1) {
+    if (this.debugPoints.length > 2) {
       this.debugPoints = this.debugPoints.slice(1);
     }
     this.debugPoints.push({
@@ -140,13 +140,14 @@ class World {
     let currentPosition;
     newWorld.players.forEach((newPlayer,i) => {
       let existingPlayer = this.getPlayer(newPlayer.id);
-      if(i==0){
+      if(i==0&&existingPlayer){
         currentPosition={
-        x:existingPlayer.p.x,
-        y:existingPlayer.p.y,
+          x:existingPlayer.p.x,
+          y:existingPlayer.p.y,
+        }
       }
-    }
       if (existingPlayer) {
+      this.addDebugPoint(existingPlayer.p.x,existingPlayer.p.y,10,"green");
         existingPlayer.update(newPlayer);
       } else {
         //Turn the new player into a player object
@@ -156,8 +157,7 @@ class World {
 
         existingPlayer = newPlayerObject;
       }
-      // this.addDebugPoint(newPlayer.p.x,newPlayer.p.y,20,"red");
-      // this.addDebugPoint(existingPlayer.p.x,existingPlayer.p.y,10,"green");
+      this.addDebugPoint(newPlayer.p.x,newPlayer.p.y,20,"red");
 
       //Remove players that are no longer in the world
       this.players.forEach((player) => {
@@ -178,15 +178,20 @@ class World {
       Object.keys(this.storedEvents).indexOf(String(lastTickServerSaw))
     );
     console.log(allEventIdsToDo);
+    const allEvents=[];
     allEventIdsToDo.forEach((tickToRun) => {
       const events = this.storedEvents[tickToRun][this.players[0].id];
+      allEvents.push(events);
       this.runEvents(this.players[0], events);
     });
+    console.log("here are the events we ran to reconcile, ",allEvents);
 
     const newPos = {
       x:this.players[0].p.x,
       y:this.players[0].p.y,
     }
+
+    this.addDebugPoint(this.players[0].p.x,this.players[0].p.y,"pink");
 
     const distance = Math.sqrt(Math.pow(currentPosition.x-newPos.x,2)+Math.pow(currentPosition.y-newPos.y,2));
     console.log("AFTER RECONCILING, WE ARE THIS FAR AWAY FROM POSTION ",distance);
