@@ -24,6 +24,7 @@ class Renderer {
 
         const debugPoints = this.world.getDebugPoints();
         debugPoints.forEach((point)=>{
+            return;
             ctx.beginPath();
             ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
             ctx.fillStyle = point.color;
