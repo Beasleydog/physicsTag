@@ -10,6 +10,7 @@
   },
   "scripts": {
     "server": "nodemon src/server/index.js",
-    "client": "npx webpack"
+    "client": "npx webpack",
+    "start":"npx webpack & node src/server/index.js"
   }
 }
