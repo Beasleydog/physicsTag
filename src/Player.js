@@ -76,6 +76,15 @@ class Player {
       this.handleMove(direction);
     });
 
+    if(isNaN(this.p.x))this.p.x=0;
+    if(isNaN(this.p.y))this.p.y=0;
+
+    if(isNaN(this.v.x))this.v.x=0;
+    if(isNaN(this.v.y))this.v.y=0;
+
+    if(isNaN(this.a.x))this.a.x=0;
+    if(isNaN(this.a.y))this.a.y=0;
+
 
     this.v.x *= (this.a.x * PLAYER_FRICTION);
     this.v.y *= (this.a.y * PLAYER_FRICTION);

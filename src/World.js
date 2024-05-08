@@ -35,8 +35,6 @@ class World {
     });
   }
   addEventListener(callback) {
-    //Format for callback params:
-    //Player, Event, Event Status
     this.listeners.push(callback);
   }
   bindKeys(player, eventsAndKeys) {
@@ -136,6 +134,7 @@ class World {
     };
   }
   deserialize(newWorld, playersLatestPackets) {
+    console.log(newWorld);
     //Loop through all players in newWorld. If we have a player with the same id, update it. If not, add it.
     let currentPosition;
     newWorld.players.forEach((newPlayer,i) => {
@@ -167,34 +166,35 @@ class World {
       });
     });
 
-    //YOUR client will always be first object
-    let lastTickServerSaw = playersLatestPackets[this.players[0].id];
-
+    
     //SERVER RECONCILLATION, NOT WORKING ATM
-    console.log("-----");
-    console.log(JSON.parse(JSON.stringify(this.storedEvents)));
-    console.log(lastTickServerSaw);
-    const allEventIdsToDo = Object.keys(this.storedEvents).slice(
-      Object.keys(this.storedEvents).indexOf(String(lastTickServerSaw))
-    );
-    console.log(allEventIdsToDo);
-    const allEvents=[];
-    allEventIdsToDo.forEach((tickToRun) => {
-      const events = this.storedEvents[tickToRun][this.players[0].id];
-      allEvents.push(events);
-      this.runEvents(this.players[0], events);
-    });
-    console.log("here are the events we ran to reconcile, ",allEvents);
+    
+    //YOUR client will always be first object
+    // let lastTickServerSaw = playersLatestPackets[this.players[0].id];
+    // console.log("-----");
+    // console.log(JSON.parse(JSON.stringify(this.storedEvents)));
+    // console.log(lastTickServerSaw);
+    // const allEventIdsToDo = Object.keys(this.storedEvents).slice(
+    //   Object.keys(this.storedEvents).indexOf(String(lastTickServerSaw))
+    // );
+    // console.log(allEventIdsToDo);
+    // const allEvents=[];
+    // allEventIdsToDo.forEach((tickToRun) => {
+    //   const events = this.storedEvents[tickToRun][this.players[0].id];
+    //   allEvents.push(events);
+    //   this.runEvents(this.players[0], events);
+    // });
+    // console.log("here are the events we ran to reconcile, ",allEvents);
 
-    const newPos = {
-      x:this.players[0].p.x,
-      y:this.players[0].p.y,
-    }
+    // const newPos = {
+    //   x:this.players[0].p.x,
+    //   y:this.players[0].p.y,
+    // }
 
-    this.addDebugPoint(this.players[0].p.x,this.players[0].p.y,"pink");
+    // this.addDebugPoint(this.players[0].p.x,this.players[0].p.y,"pink");
 
-    const distance = Math.sqrt(Math.pow(currentPosition.x-newPos.x,2)+Math.pow(currentPosition.y-newPos.y,2));
-    console.log("AFTER RECONCILING, WE ARE THIS FAR AWAY FROM POSTION ",distance);
+    // const distance = Math.sqrt(Math.pow(currentPosition.x-newPos.x,2)+Math.pow(currentPosition.y-newPos.y,2));
+    // console.log("AFTER RECONCILING, WE ARE THIS FAR AWAY FROM POSTION ",distance);
   }
 }
 module.exports = World;

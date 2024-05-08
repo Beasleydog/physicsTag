@@ -5,6 +5,8 @@ import ClientMultiplayer from "./ClientMultiplayer.js";
 
 //Have to wait till onload beacuse playcode is weird
 window.onload = () => {
+  document.title="Tag";
+
   const ourWorld = new World(true);
 
   //Setup canvas
